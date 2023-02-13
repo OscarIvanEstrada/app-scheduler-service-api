@@ -1,0 +1,44 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /v1.0/
+spring:
+  application:
+    name: app-scheduler-service-api
+    version: develop
+  sleuth:
+     sampler:
+        probability: 1
+  datasource:
+    url: jdbc:h2:C://Users//user//h2//schedule
+    username: sa
+    password: 
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    # Hibernate ddl auto (create, create-drop, validate, update)
+    hibernate:
+      ddl-auto: update
+---
+server:
+  port: ${PORT}
+  servlet:
+    context-path: /v1.0/
+spring:
+  profiles: release
+  application:
+    name: app-scheduler-service-api
+    version: ${APP_VERSION}
+  sleuth:
+     sampler:
+        probability: 1
+azure:
+  host:
+    name: ${WEBSITE_SITE_NAME:localhost}
+    slot: ${WEBSITE_SLOT_NAME:develop}
+  cosmos:
+    populateQueryMetrics: 'true'
+    database: ${AZURE_DATABASE_COSMOS_DATABASE}
+    uri: ${AZURE_DATABASE_COSMOS_URI}
+    key: ${AZURE_DATABASE_COSMOS_KEY}
