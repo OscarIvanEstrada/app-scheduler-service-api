@@ -212,9 +212,9 @@ public class ApiController {
     }
 
     @RequestMapping(value= "/scheduler/getJobsToFire", method = RequestMethod.GET)
-    public ServerResponse getJobsToFire(){
-        List<Map<String, Object>> list = jobService.getAllJobsToFire();
-        return getServerResponse(ServerResponseCode.SUCCESS, list);
+    public ServerResponse getJobsToFire(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName){
+        Job job =controllerBusiness.findPendingJobByGroupAndJobName(groupName, jobName);
+        return getServerResponse(ServerResponseCode.SUCCESS, job);
     }
 
     public ServerResponse getServerResponse(int responseCode, Object data){

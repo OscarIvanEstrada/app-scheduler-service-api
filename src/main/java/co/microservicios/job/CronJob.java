@@ -1,8 +1,6 @@
 package co.microservicios.job;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.quartz.InterruptableJob;
 import org.quartz.JobExecutionContext;
@@ -10,18 +8,9 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.UnableToInterruptJobException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import co.microservicios.dto.Response;
 import co.microservicios.model.Job;
 import co.microservicios.model.Trigger;
 import co.microservicios.repository.JobRepository;
