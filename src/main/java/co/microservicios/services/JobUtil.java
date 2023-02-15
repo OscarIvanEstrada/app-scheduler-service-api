@@ -36,7 +36,7 @@ class JobUtil {
         
 	    // set job data map
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put("msisdn", "3004183070");
+        jobDataMap.put("data", "sample");
         factoryBean.setJobDataMap(jobDataMap);
         
         factoryBean.afterPropertiesSet();
@@ -56,7 +56,7 @@ class JobUtil {
 	 *
 	 * @return Trigger
 	 */
-	protected static Trigger createCronTrigger(String groupName, String triggerName, Date startTime, String cronExpression, int misFireInstruction){
+	protected static Trigger createCronTrigger(String groupName, String triggerName, Date startTime, String cronExpression, int misFireInstruction, String description){
 		CronTriggerImpl trigger = new CronTriggerImpl();
 		trigger.setName(triggerName);
 		trigger.setGroup(groupName);
@@ -66,7 +66,7 @@ class JobUtil {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		trigger.setDescription("Descripción");
+		trigger.setDescription(description);
 		return trigger;
 	}
 	

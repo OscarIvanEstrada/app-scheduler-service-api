@@ -1,0 +1,3 @@
+service: app-scheduler-service-api
+runtime: java11
+instance_class: F4_1G

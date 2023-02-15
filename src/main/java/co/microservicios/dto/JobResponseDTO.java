@@ -7,8 +7,8 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-@ApiModel(description = "JobRequestDTO")
-public class JobRequestDTO {
+@ApiModel(description = "JobResponseDTO")
+public class JobResponseDTO {
   
     @ApiModelProperty(value = "Data Exmaple job. Job + Group must be unique", required = true, example = "job")
     private String jobName;

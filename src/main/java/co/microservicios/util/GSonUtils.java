@@ -27,6 +27,11 @@ public class GSonUtils {
 		Gson gson = new Gson();
 		return gson.fromJson(src,clazz);
 	}
+
+	public static <T> T toObject(Object src, Class<T> clazz) {
+		Gson gson = new Gson();
+		return gson.fromJson(serialize(src),clazz);
+	}
 	
 	   public static <T> List<T>  toList(String src, Class<T> clazz) {
 			Gson gson = new Gson();

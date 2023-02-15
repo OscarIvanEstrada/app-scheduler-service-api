@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import co.microservicios.job.SimpleJob;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -24,6 +23,10 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
 
+import co.microservicios.job.SimpleJob;
+import co.microservicios.model.Job;
+import co.microservicios.repository.JobRepository;
+
 
 
 
@@ -37,11 +40,14 @@ public class JobServiceImpl implements JobService{
 	@Autowired
 	private ApplicationContext context;
 
+	@Autowired
+    JobRepository jobRepository;
+
 	/**
 	 * Schedule a job by jobName at given date.
 	 */
 	@Override
-	public boolean scheduleOneTimeJob(String groupName, String jobName, Class<SimpleJob> jobClass, Date date) {
+	public boolean scheduleOneTimeJob(String groupName, String jobName, Class<SimpleJob> jobClass, Date date, String description) {
 		System.out.println("Request received to scheduleJob");
 
 		String jobKey = jobName;
@@ -71,7 +77,7 @@ public class JobServiceImpl implements JobService{
 	 * Schedule a job by jobName at given date.
 	 */
 	@Override
-	public boolean 	scheduleCronJob(String groupName, String jobName, Class<? extends QuartzJobBean> jobClass, Date date, String cronExpression) {
+	public boolean 	scheduleCronJob(String groupName, String jobName, Class<? extends QuartzJobBean> jobClass, Date date, String cronExpression, String description) {
 		System.out.println("Request received to scheduleJob");
 
 		String jobKey = jobName;
@@ -81,7 +87,7 @@ public class JobServiceImpl implements JobService{
 		JobDetail jobDetail = JobUtil.createJob(jobClass, false, context, jobKey, groupKey);
 
 		System.out.println("creating trigger for key :"+jobKey + " at date :"+date);
-		Trigger cronTriggerBean = JobUtil.createCronTrigger(groupName, triggerKey, date, cronExpression, SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+		Trigger cronTriggerBean = JobUtil.createCronTrigger(groupName, triggerKey, date, cronExpression, SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW,description);
 
 		try {
 			Scheduler scheduler = schedulerFactoryBean.getScheduler();
@@ -100,7 +106,7 @@ public class JobServiceImpl implements JobService{
 	 * Update scheduled cron job.
 	 */
 	@Override
-	public boolean updateCronJob(String groupName, String jobName, Date date, String cronExpression) {
+	public boolean updateCronJob(String groupName, String jobName, Date date, String cronExpression, String description) {
 		System.out.println("Request received for updating cron job.");
 
 		String jobKey = jobName;
@@ -108,7 +114,7 @@ public class JobServiceImpl implements JobService{
 		System.out.println("Parameters received for updating cron job : jobKey :"+jobKey + ", date: "+date);
 		try {
 			//Trigger newTrigger = JobUtil.createSingleTrigger(jobKey, date, SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT);
-			Trigger newTrigger = JobUtil.createCronTrigger(groupName,jobKey, date, cronExpression, SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+			Trigger newTrigger = JobUtil.createCronTrigger(groupName,jobKey, date, cronExpression, SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW,description);
 
 			Date dt = schedulerFactoryBean.getScheduler().rescheduleJob(TriggerKey.triggerKey(jobKey,groupName), newTrigger);
 			System.out.println("Trigger associated with jobKey :"+jobKey+ " rescheduled successfully for date :"+dt);
@@ -287,15 +293,19 @@ public class JobServiceImpl implements JobService{
 					Date scheduleTime = triggers.get(0).getStartTime();
 					Date nextFireTime = triggers.get(0).getNextFireTime();
 					Date lastFiredTime = triggers.get(0).getPreviousFireTime();
-					Date now = new Date();
-					
+				
+					Job job = jobRepository.findJobByGroupAndJobName(jobGroup,jobName);
+	
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("jobName", jobName);
 					map.put("groupName", jobGroup);
+					map.put("service", job.getService());
+					map.put("cronExpression", job.getCronExpression());					
+					map.put("description", job.getDescription());
 					map.put("scheduleTime", scheduleTime);
 					map.put("lastFiredTime", lastFiredTime);
 					map.put("nextFireTime", nextFireTime);
-					map.put("toFire", now.compareTo(nextFireTime)>=0?true:false);
+	
 					
 					if(isJobRunning(groupName, jobName)){
 						map.put("jobStatus", "RUNNING");
@@ -304,20 +314,8 @@ public class JobServiceImpl implements JobService{
 						map.put("jobStatus", jobState);
 					}
 
-					/*					Date currentDate = new Date();
-					if (scheduleTime.compareTo(currentDate) > 0) {
-						map.put("jobStatus", "scheduled");
-
-					} else if (scheduleTime.compareTo(currentDate) < 0) {
-						map.put("jobStatus", "Running");
-
-					} else if (scheduleTime.compareTo(currentDate) == 0) {
-						map.put("jobStatus", "Running");
-					}*/
 
 					list.add(map);
-					//System.out.println("Job details:");
-					//System.out.println("Job Name:"+jobName + ", Group Name:"+ groupName + ", Schedule Time:"+scheduleTime);
 				}
 
 			}
@@ -328,57 +326,6 @@ public class JobServiceImpl implements JobService{
 		return list;
 	}
 
-
-	/**
-	 * Get all jobs
-	 */
-	@Override
-	public List<Map<String, Object>> getAllJobsToFire() {
-		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-		try {
-			Scheduler scheduler = schedulerFactoryBean.getScheduler();
-
-			for (String groupName : scheduler.getJobGroupNames()) {
-				for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
-
-					String jobName = jobKey.getName();
-					String jobGroup = jobKey.getGroup();
-
-					//get job's trigger
-					List<Trigger> triggers = (List<Trigger>) scheduler.getTriggersOfJob(jobKey);
-					Date scheduleTime = triggers.get(0).getStartTime();
-					Date nextFireTime = triggers.get(0).getNextFireTime();
-					Date lastFiredTime = triggers.get(0).getPreviousFireTime();
-					Date now = new Date();
-					boolean toFire =now.compareTo(nextFireTime)>=0?true:false;
-					
-					Map<String, Object> map = new HashMap<String, Object>();
-					map.put("jobName", jobName);
-					map.put("groupName", jobGroup);
-					map.put("scheduleTime", scheduleTime);
-					map.put("lastFiredTime", lastFiredTime);
-					map.put("nextFireTime", nextFireTime);
-					map.put("toFire", toFire);
-					
-					if(isJobRunning(groupName, jobName)){
-						map.put("jobStatus", "RUNNING");
-					}else{
-						String jobState = getJobState(groupName, jobName);
-						map.put("jobStatus", jobState);
-					}
-
-					if(toFire){
-						list.add(map);
-					}
-					}
-
-			}
-		} catch (SchedulerException e) {
-			System.out.println("SchedulerException while fetching all jobs. error message :"+e.getMessage());
-			e.printStackTrace();
-		}
-		return list;
-	}
 
 
 	

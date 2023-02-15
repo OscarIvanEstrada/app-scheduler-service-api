@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
   servlet:
     context-path: /v1.0/
 spring:
@@ -10,7 +10,8 @@ spring:
      sampler:
         probability: 1
   datasource:
-    url: jdbc:h2:C://Users//user//h2//schedule
+    url: jdbc:h2:/home/schedule
+    #url: jdbc:h2:C:\home\schedule
     username: sa
     password: 
     driverClassName: org.h2.Driver

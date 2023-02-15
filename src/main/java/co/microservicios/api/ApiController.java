@@ -19,11 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import co.microservicios.business.ControllerBusiness;
 import co.microservicios.dto.JobRequestDTO;
+import co.microservicios.dto.JobResponseDTO;
 import co.microservicios.dto.ServerResponse;
 import co.microservicios.job.CronJob;
 import co.microservicios.model.Job;
 import co.microservicios.repository.JobRepository;
 import co.microservicios.services.JobService;
+import co.microservicios.util.GSonUtils;
 import co.microservicios.util.ServerResponseCode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
@@ -57,7 +59,7 @@ public class ApiController {
 
 
     @RequestMapping(value= "/scheduler/addJob", method = RequestMethod.POST)
-    public ServerResponse addJob(@RequestBody JobRequestDTO request) {
+    public JobResponseDTO addJob(@RequestBody JobRequestDTO request) {
       
         Job job = new Job();
         job.setCronExpression(request.getCronExpression());
@@ -68,28 +70,45 @@ public class ApiController {
         //0 0/1 * 1/1 * ? * cada minuto
         //Job Name is mandatory
         if(request.getJobName() == null || request.getJobName().trim().equals("")){
-            return getServerResponse(ServerResponseCode.ERROR, false);
+            return GSonUtils.toObject(request, JobResponseDTO.class);
         }
 
         //Job Name is mandatory
         if(request.getCronExpression() == null || request.getCronExpression().trim().equals("")){
-            return getServerResponse(ServerResponseCode.ERROR, false);
+            return GSonUtils.toObject(request, JobResponseDTO.class);
         }
 
         //Check if job Name is unique;
         if(!jobService.isJobWithNamePresent(request.getGroupName(), request.getJobName())) {
 
-            boolean status =jobService.scheduleCronJob(request.getGroupName(),request.getJobName(), CronJob.class, new Date(), request.getCronExpression());
+            boolean status =jobService.scheduleCronJob(request.getGroupName(),request.getJobName(), CronJob.class, new Date(), request.getCronExpression(),request.getDescription());
 
             if(status){
                 jobRepository.save(job);
             }
 
-            return getServerResponse(ServerResponseCode.SUCCESS,  status);
+            return GSonUtils.toObject(request, JobResponseDTO.class);
 
         }
-        return getServerResponse(ServerResponseCode.SUCCESS, false);
+        return GSonUtils.toObject(request, JobResponseDTO.class);
     }
+
+    @RequestMapping(value= "/scheduler/getJobs", method = RequestMethod.GET)
+    public List<Map<String, Object>> getJobs(){
+        List<Map<String, Object>> list = jobService.getAllJobs();
+        return list;
+    }
+
+    @RequestMapping(value= "/scheduler/getJobsToFire", method = RequestMethod.GET)
+    public JobResponseDTO getJobsToFire(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName){
+        Job job =controllerBusiness.findPendingJobByGroupAndJobName(groupName, jobName);
+        return GSonUtils.toObject(job, JobResponseDTO.class);
+    }
+
+
+
+    /* To refactor */
+
 
     @RequestMapping(value= "/scheduler/startJob", method = RequestMethod.GET)
     public ServerResponse startJob(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
@@ -152,7 +171,7 @@ public class ApiController {
             return getServerResponse(ServerResponseCode.ERROR, false);
         }
 
-        boolean status = jobService.updateCronJob(groupName,jobName, new Date(), cronExpression);
+        boolean status = jobService.updateCronJob(groupName,jobName, new Date(), cronExpression,"");
 
         if(status){
             Job job = jobRepository.findJobByGroupAndJobName(groupName,jobName);
@@ -205,17 +224,7 @@ public class ApiController {
         return getServerResponse(ServerResponseCode.SUCCESS, jobService.stopJob(groupName,jobName));
     }
 
-    @RequestMapping(value= "/scheduler/getJobs", method = RequestMethod.GET)
-    public ServerResponse getJobs(){
-        List<Map<String, Object>> list = jobService.getAllJobs();
-        return getServerResponse(ServerResponseCode.SUCCESS, list);
-    }
-
-    @RequestMapping(value= "/scheduler/getJobsToFire", method = RequestMethod.GET)
-    public ServerResponse getJobsToFire(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName){
-        Job job =controllerBusiness.findPendingJobByGroupAndJobName(groupName, jobName);
-        return getServerResponse(ServerResponseCode.SUCCESS, job);
-    }
+   
 
     public ServerResponse getServerResponse(int responseCode, Object data){
         ServerResponse serverResponse = new ServerResponse();
