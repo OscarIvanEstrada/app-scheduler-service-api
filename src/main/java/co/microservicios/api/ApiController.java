@@ -37,7 +37,11 @@ import io.swagger.annotations.ApiResponses;
         @ApiResponse(code = 500, message = "Internal Server Error")
 })
 @Api(value = "app-scheduler-service-api ApiController", description = "scheduler",  tags = {"",""})
-//TODO: Add documentations for class and methods	
+//DONE: Add documentations for class and methods	
+/**
+ *  ApiController: This controller exposes the API endpoints for managing scheduled jobs.
+ *  It allows for adding, retrieving, starting, pausing, resuming, deleting, and updating jobs.
+ */
 public class ApiController {
 
     @Autowired
@@ -47,6 +51,10 @@ public class ApiController {
 	private String version;
 
 	@GetMapping("version")
+    /**
+     * Returns the version of the application.
+     * @return ResponseEntity<String> - The version of the application.
+     */
     public ResponseEntity<String> version() {
         return new ResponseEntity(version, HttpStatus.OK);
     }
@@ -60,6 +68,11 @@ public class ApiController {
 
 
     @RequestMapping(value= "/scheduler/addJob", method = RequestMethod.POST)
+    /**
+     * Adds a new job to the scheduler.
+     * @param request JobRequestDTO - The job request containing job details.
+     * @return JobResponseDTO - The response containing job details.
+     */
     public JobResponseDTO addJob(@RequestBody JobRequestDTO request) {
       
         Job job = new Job();
@@ -95,12 +108,22 @@ public class ApiController {
     }
 
     @RequestMapping(value= "/scheduler/getJobs", method = RequestMethod.GET)
+    /**
+     * Retrieves all scheduled jobs.
+     * @return List<Map<String, Object>> - A list of maps containing job details.
+     */
     public List<Map<String, Object>> getJobs(){
         List<Map<String, Object>> list = jobService.getAllJobs();
         return list;
     }
 
     @RequestMapping(value= "/scheduler/getJobsToFire", method = RequestMethod.GET)
+    /**
+     * Retrieves jobs that are pending to be fired.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return JobResponseDTO - The response containing job details.
+     */
     public JobResponseDTO getJobsToFire(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName){
         Job job =controllerBusiness.findPendingJobByGroupAndJobName(groupName, jobName);
         return GSonUtils.toObject(job, JobResponseDTO.class);
@@ -112,6 +135,12 @@ public class ApiController {
 
 
     @RequestMapping(value= "/scheduler/startJob", method = RequestMethod.GET)
+    /**
+     * Starts a job.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response indicating the status of the operation.
+     */
     public ServerResponse startJob(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
 
         //Job Name is mandatory
@@ -122,6 +151,12 @@ public class ApiController {
     }
 
     @RequestMapping(value= "/scheduler/pauseJob", method = RequestMethod.GET)
+    /**
+     * Pauses a job.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response indicating the status of the operation.
+     */
     public ServerResponse pauseJob(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
 
         //Job Name is mandatory
@@ -132,6 +167,12 @@ public class ApiController {
     }
 
     @RequestMapping(value= "/scheduler/resumeJob", method = RequestMethod.GET)
+    /**
+     * Resumes a paused job.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response indicating the status of the operation.
+     */
     public ServerResponse resumeJob(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
         //Job Name is mandatory
         if(jobName == null || jobName.trim().equals("")){
@@ -142,6 +183,12 @@ public class ApiController {
 
 
     @RequestMapping(value= "/scheduler/deleteJob", method = RequestMethod.GET)
+    /**
+     * Deletes a job.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response indicating the status of the operation.
+     */
     public ServerResponse deleteJob(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
         //Job Name is mandatory
         if(jobName == null || jobName.trim().equals("")){
@@ -160,6 +207,14 @@ public class ApiController {
     }
 
     @RequestMapping(value= "/scheduler/updateJob", method = RequestMethod.GET)
+    /**
+     * Updates a job.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @param cronExpression String - The new cron expression for the job.
+     * @param service String - The service associated with the job.
+     * @return ServerResponse - The server response indicating the status of the operation.
+     */
     public ServerResponse updateJob(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName, @RequestParam("cronExpression") String cronExpression, @RequestParam("service") String service) {
 
         //Job Name is mandatory
@@ -172,7 +227,7 @@ public class ApiController {
             return getServerResponse(ServerResponseCode.ERROR, false);
         }
 
-        boolean status = jobService.updateCronJob(groupName,jobName, new Date(), cronExpression,"");
+        boolean status = jobService.updateCronJob(groupName,jobName, new Date(), cronExpression," ");
 
         if(status){
             Job job = jobRepository.findJobByGroupAndJobName(groupName,jobName);
@@ -189,6 +244,12 @@ public class ApiController {
 
 
     @RequestMapping(value= "/scheduler/jobState", method = RequestMethod.GET)
+    /**
+     * Retrieves the state of a job.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response containing the job state.
+     */
     public ServerResponse jobState(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
 
         //Job Name is mandatory
@@ -199,6 +260,12 @@ public class ApiController {
     }
 
     @RequestMapping(value= "/scheduler/checkJobName", method = RequestMethod.GET)
+    /**
+     * Checks if a job with the given name exists.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response indicating whether the job exists.
+     */
     public ServerResponse checkJobName(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName){
         //Job Name is mandatory
         if(jobName == null || jobName.trim().equals("")){
@@ -209,6 +276,12 @@ public class ApiController {
     }
 
     @RequestMapping(value= "/scheduler/isJobRunning", method = RequestMethod.GET)
+    /**
+     * Checks if a job is currently running.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response indicating whether the job is running.
+     */
     public ServerResponse isJobRunning(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
         boolean status = jobService.isJobRunning(groupName,jobName);
         return getServerResponse(ServerResponseCode.SUCCESS, status);
@@ -217,6 +290,12 @@ public class ApiController {
 
 
     @RequestMapping(value= "/scheduler/stopJob", method = RequestMethod.GET)
+    /**
+     * Stops a running job.
+     * @param groupName String - The group name of the job.
+     * @param jobName String - The name of the job.
+     * @return ServerResponse - The server response indicating the status of the operation.
+     */
     public ServerResponse stopJob(@RequestParam("groupName") String groupName, @RequestParam("jobName") String jobName) {
         //Job Name is mandatory
         if(jobName == null || jobName.trim().equals("")){
@@ -226,7 +305,12 @@ public class ApiController {
     }
 
    
-
+    /**
+     * Creates a server response with the given response code and data.
+     * @param responseCode int - The response code.
+     * @param data Object - The data to be included in the response.
+     * @return ServerResponse - The server response object.
+     */
     public ServerResponse getServerResponse(int responseCode, Object data){
         ServerResponse serverResponse = new ServerResponse();
         serverResponse.setStatusCode(responseCode);
