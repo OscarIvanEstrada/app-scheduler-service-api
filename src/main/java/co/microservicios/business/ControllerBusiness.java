@@ -9,7 +9,10 @@ import co.microservicios.repository.JobRepository;
 import co.microservicios.repository.TriggerRepository;
 import co.microservicios.util.LoggerUtil;
 
-//TODO: Add documentation to class and methods
+/**
+ * ControllerBusiness: This class provides business logic for managing jobs and triggers.
+ * It includes methods for finding pending jobs and updating trigger statuses.
+ */
 @Component
 public class ControllerBusiness {
 
@@ -24,6 +27,15 @@ public class ControllerBusiness {
 
 
 
+	 /**
+     * Finds a pending job by its group name and job name.
+     * A pending job is a job that has associated triggers that have not been viewed yet.
+     * This method also marks the triggers associated with the job as viewed.
+     *
+     * @param groupName The group name of the job.
+     * @param jobName   The name of the job.
+     * @return The job if found, otherwise null.
+     */
 	public Job findPendingJobByGroupAndJobName( String groupName, String jobName){
 
 		Job job = jobRepository.findPendingJobByGroupAndJobName(groupName, jobName); 
