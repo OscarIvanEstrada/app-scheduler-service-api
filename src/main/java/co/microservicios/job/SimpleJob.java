@@ -11,7 +11,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import co.microservicios.repository.JobRepository;
 import co.microservicios.services.JobService;
-
+//TODO: Add documentation for class and methods
 public class SimpleJob extends QuartzJobBean implements InterruptableJob{
 	
 	private volatile boolean toStopFlag = true;
