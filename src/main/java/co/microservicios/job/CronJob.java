@@ -17,6 +17,7 @@ import co.microservicios.repository.JobRepository;
 import co.microservicios.repository.TriggerRepository;
 import co.microservicios.services.JobService;
 
+//TODO: Add documentation for class and methods
 public class CronJob extends QuartzJobBean implements InterruptableJob{
 	
 
