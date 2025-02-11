@@ -11,7 +11,11 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import co.microservicios.repository.JobRepository;
 import co.microservicios.services.JobService;
-//TODO: Add documentation for class and methods
+//DONE: Add documentation for class and methods
+/**
+ * SimpleJob: This class represents a simple scheduled job that extends QuartzJobBean and implements InterruptableJob.
+ * It is responsible for executing the job logic when triggered by the scheduler.
+ */
 public class SimpleJob extends QuartzJobBean implements InterruptableJob{
 	
 	private volatile boolean toStopFlag = true;
