@@ -17,7 +17,11 @@ import co.microservicios.repository.JobRepository;
 import co.microservicios.repository.TriggerRepository;
 import co.microservicios.services.JobService;
 
-//TODO: Add documentation for class and methods
+//DONE: Add documentation for class and methods
+/**
+ * CronJob: This class represents a scheduled job that extends QuartzJobBean and implements InterruptableJob.
+ * It is responsible for executing the job logic when triggered by the scheduler.
+ */
 public class CronJob extends QuartzJobBean implements InterruptableJob{
 	
 
