@@ -11,7 +11,11 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
 
 import co.microservicios.enums.ErrorEnum;
-//TODO: Add documentation to class and methods
+
+/**
+ * RestTemplateResponseErrorHandler: This class implements a custom error handler for RestTemplate.
+ * It checks for errors in the HTTP response and throws an ApiException if an error is found.
+ */
 public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
 
 	@Override
@@ -35,4 +39,3 @@ public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
 		}
 	}
 }
-
