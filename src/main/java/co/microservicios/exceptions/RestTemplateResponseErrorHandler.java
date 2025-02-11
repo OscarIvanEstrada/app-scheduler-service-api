@@ -11,7 +11,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
 
 import co.microservicios.enums.ErrorEnum;
-
+//TODO: Add documentation to class and methods
 public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
 
 	@Override
